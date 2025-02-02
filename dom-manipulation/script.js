@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let serverQuotes = [];
 
     // Simulate fetching data from a mock server
-    function fetchFromServer() {
+    function fetchQuotesFromServer() {
         fetch('https://jsonplaceholder.typicode.com/posts') // Using JSONPlaceholder for simulation
             .then(response => response.json())
             .then(data => {
@@ -170,7 +170,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("exportQuotes").addEventListener("click", exportQuotes);
 
     // Set up periodic fetch for server data and sync with local data
-    setInterval(fetchFromServer, 10000);  // Fetch from server every 10 seconds
+    setInterval(fetchQuotesFromServer, 10000);  // Fetch from server every 10 seconds
 
     populateCategories();
     filterQuotes();  // Show filtered quotes initially
