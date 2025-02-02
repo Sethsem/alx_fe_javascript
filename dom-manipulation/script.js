@@ -49,7 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         saveQuotes();
-        alert("Quotes have been synchronized with the server.");
+        alert("Quotes synced with server!");
     }
 
     // Simulate posting data to the server (using async/await)
