@@ -76,14 +76,16 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("newQuoteText").value = "";
     }
 
+    // Update export function to use Blob with JSON MIME type
     function exportQuotes() {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(quotes));
-        const downloadAnchor = document.createElement("a");
-        downloadAnchor.setAttribute("href", dataStr);
-        downloadAnchor.setAttribute("download", "quotes.json");
-        document.body.appendChild(downloadAnchor);
-        downloadAnchor.click();
-        document.body.removeChild(downloadAnchor);
+        const dataStr = JSON.stringify(quotes);
+        const blob = new Blob([dataStr], { type: "application/json" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "quotes.json";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 
     window.importFromJsonFile = function(event) {
