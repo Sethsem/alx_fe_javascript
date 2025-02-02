@@ -16,38 +16,41 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let serverQuotes = [];
 
-    // Simulate fetching data from a mock server
-    function fetchQuotesFromServer() {
-        fetch('https://jsonplaceholder.typicode.com/posts') // Using JSONPlaceholder for simulation
-            .then(response => response.json())
-            .then(data => {
-                serverQuotes = data.slice(0, 5).map(post => ({
-                    category: 'Misc',
-                    quote: post.title
-                }));
-                syncData();
-            })
-            .catch(error => console.error('Error fetching server data:', error));
+    // Async function to simulate fetching data from a mock server
+    async function fetchQuotesFromServer() {
+        try {
+            const response = await fetch('https://jsonplaceholder.typicode.com/posts'); // Using JSONPlaceholder for simulation
+            const data = await response.json();
+            serverQuotes = data.slice(0, 5).map(post => ({
+                category: 'Misc',
+                quote: post.title
+            }));
+            syncData();
+        } catch (error) {
+            console.error('Error fetching server data:', error);
+        }
     }
 
-    // Simulate posting data to the server
-    function postToServer(newQuote) {
-        fetch('https://jsonplaceholder.typicode.com/posts', {
-            method: 'POST',
-            body: JSON.stringify({
-                title: newQuote.quote,
-                body: newQuote.category,
-                userId: 1
-            }),
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
+    // Simulate posting data to the server (using async/await)
+    async function postToServer(newQuote) {
+        try {
+            const response = await fetch('https://jsonplaceholder.typicode.com/posts', {
+                method: 'POST',
+                body: JSON.stringify({
+                    title: newQuote.quote,
+                    body: newQuote.category,
+                    userId: 1
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
             alert('Quote posted to server successfully');
-        })
-        .catch(error => console.error('Error posting to server:', error));
+        } catch (error) {
+            console.error('Error posting to server:', error);
+        }
     }
 
     // Sync local data with server data
@@ -116,7 +119,7 @@ document.addEventListener("DOMContentLoaded", () => {
         quoteDisplay.textContent = filteredQuotes[randomIndex];
     }
 
-    function addQuote() {
+    async function addQuote() {
         const category = document.getElementById("newQuoteCategory").value.trim();
         const quoteText = document.getElementById("newQuoteText").value.trim();
         
@@ -132,6 +135,9 @@ document.addEventListener("DOMContentLoaded", () => {
             saveQuotes();
             alert("Quote added successfully!");
             filterQuotes();
+
+            // Optionally post the new quote to the server
+            await postToServer({ quote: quoteText, category: category });
         }
 
         document.getElementById("newQuoteCategory").value = "";
