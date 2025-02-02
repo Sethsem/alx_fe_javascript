@@ -14,12 +14,68 @@ document.addEventListener("DOMContentLoaded", () => {
         ]
     };
 
+    let serverQuotes = [];
+
+    // Simulate fetching data from a mock server
+    function fetchFromServer() {
+        fetch('https://jsonplaceholder.typicode.com/posts') // Using JSONPlaceholder for simulation
+            .then(response => response.json())
+            .then(data => {
+                serverQuotes = data.slice(0, 5).map(post => ({
+                    category: 'Misc',
+                    quote: post.title
+                }));
+                syncData();
+            })
+            .catch(error => console.error('Error fetching server data:', error));
+    }
+
+    // Simulate posting data to the server
+    function postToServer(newQuote) {
+        fetch('https://jsonplaceholder.typicode.com/posts', {
+            method: 'POST',
+            body: JSON.stringify({
+                title: newQuote.quote,
+                body: newQuote.category,
+                userId: 1
+            }),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert('Quote posted to server successfully');
+        })
+        .catch(error => console.error('Error posting to server:', error));
+    }
+
+    // Sync local data with server data
+    function syncData() {
+        serverQuotes.forEach(serverQuote => {
+            const existingQuoteIndex = Object.values(quotes).flat().findIndex(quote => quote === serverQuote.quote);
+            if (existingQuoteIndex === -1) {
+                // If quote doesn't exist locally, add it
+                if (!quotes[serverQuote.category]) {
+                    quotes[serverQuote.category] = [];
+                }
+                quotes[serverQuote.category].push(serverQuote.quote);
+            } else {
+                // If conflict, resolve by preferring server data
+                quotes[serverQuote.category] = quotes[serverQuote.category].filter(quote => quote !== serverQuote.quote);
+                quotes[serverQuote.category].push(serverQuote.quote);
+            }
+        });
+
+        saveQuotes();
+        alert("Quotes have been synchronized with the server.");
+    }
+
     function saveQuotes() {
         localStorage.setItem("quotes", JSON.stringify(quotes));
     }
 
     function populateCategories() {
-        // Dynamically populate categories in the filter dropdown using map
         const categories = Object.keys(quotes);
         categories.map(category => {
             const option = document.createElement("option");
@@ -28,11 +84,10 @@ document.addEventListener("DOMContentLoaded", () => {
             categoryFilter.appendChild(option);
         });
 
-        // Restore last selected category from local storage
         const lastCategory = localStorage.getItem("lastCategory");
         if (lastCategory) {
             categoryFilter.value = lastCategory;
-            filterQuotes();  // Apply the filter based on the saved category
+            filterQuotes();
         }
     }
 
@@ -41,14 +96,12 @@ document.addEventListener("DOMContentLoaded", () => {
         let filteredQuotes = [];
 
         if (selectedCategory === "all") {
-            filteredQuotes = Object.values(quotes).flat(); // Flatten the array
+            filteredQuotes = Object.values(quotes).flat();
         } else if (quotes[selectedCategory]) {
             filteredQuotes = quotes[selectedCategory];
         }
 
         displayQuotes(filteredQuotes);
-
-        // Save the last selected category
         localStorage.setItem("lastCategory", selectedCategory);
     }
 
@@ -112,11 +165,13 @@ document.addEventListener("DOMContentLoaded", () => {
         fileReader.readAsText(event.target.files[0]);
     };
 
-    // Initial Setup
     newQuoteButton.addEventListener("click", filterQuotes);
     document.getElementById("addQuote").addEventListener("click", addQuote);
     document.getElementById("exportQuotes").addEventListener("click", exportQuotes);
 
-    populateCategories(); // Populate categories on load
-    filterQuotes(); // Show the filtered quotes initially
+    // Set up periodic fetch for server data and sync with local data
+    setInterval(fetchFromServer, 10000);  // Fetch from server every 10 seconds
+
+    populateCategories();
+    filterQuotes();  // Show filtered quotes initially
 });
