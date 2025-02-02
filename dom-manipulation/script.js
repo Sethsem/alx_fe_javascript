@@ -25,10 +25,31 @@ document.addEventListener("DOMContentLoaded", () => {
                 category: 'Misc',
                 quote: post.title
             }));
-            syncData();
+            syncQuotes();
         } catch (error) {
             console.error('Error fetching server data:', error);
         }
+    }
+
+    // Function to sync quotes from the server and handle conflicts
+    function syncQuotes() {
+        serverQuotes.forEach(serverQuote => {
+            const existingQuoteIndex = Object.values(quotes).flat().findIndex(quote => quote === serverQuote.quote);
+            if (existingQuoteIndex === -1) {
+                // If quote doesn't exist locally, add it
+                if (!quotes[serverQuote.category]) {
+                    quotes[serverQuote.category] = [];
+                }
+                quotes[serverQuote.category].push(serverQuote.quote);
+            } else {
+                // If conflict, resolve by preferring server data
+                quotes[serverQuote.category] = quotes[serverQuote.category].filter(quote => quote !== serverQuote.quote);
+                quotes[serverQuote.category].push(serverQuote.quote);
+            }
+        });
+
+        saveQuotes();
+        alert("Quotes have been synchronized with the server.");
     }
 
     // Simulate posting data to the server (using async/await)
@@ -51,27 +72,6 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (error) {
             console.error('Error posting to server:', error);
         }
-    }
-
-    // Sync local data with server data
-    function syncData() {
-        serverQuotes.forEach(serverQuote => {
-            const existingQuoteIndex = Object.values(quotes).flat().findIndex(quote => quote === serverQuote.quote);
-            if (existingQuoteIndex === -1) {
-                // If quote doesn't exist locally, add it
-                if (!quotes[serverQuote.category]) {
-                    quotes[serverQuote.category] = [];
-                }
-                quotes[serverQuote.category].push(serverQuote.quote);
-            } else {
-                // If conflict, resolve by preferring server data
-                quotes[serverQuote.category] = quotes[serverQuote.category].filter(quote => quote !== serverQuote.quote);
-                quotes[serverQuote.category].push(serverQuote.quote);
-            }
-        });
-
-        saveQuotes();
-        alert("Quotes have been synchronized with the server.");
     }
 
     function saveQuotes() {
