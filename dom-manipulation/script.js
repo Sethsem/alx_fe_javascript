@@ -19,9 +19,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function populateCategories() {
-        // Dynamically populate categories in the filter dropdown
+        // Dynamically populate categories in the filter dropdown using map
         const categories = Object.keys(quotes);
-        categories.forEach(category => {
+        categories.map(category => {
             const option = document.createElement("option");
             option.value = category;
             option.textContent = category;
@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
         let filteredQuotes = [];
 
         if (selectedCategory === "all") {
-            filteredQuotes = Object.values(quotes).flat();
+            filteredQuotes = Object.values(quotes).flat(); // Flatten the array
         } else if (quotes[selectedCategory]) {
             filteredQuotes = quotes[selectedCategory];
         }
